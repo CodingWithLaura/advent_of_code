@@ -1,3 +1,4 @@
+#!/bin/python
 import pandas as pd
 
 def sonar_sweep (depth_measurements):
@@ -8,16 +9,7 @@ def sonar_sweep (depth_measurements):
             akku+=1
     return akku
 
-
-def readFile(fileName):
-        fileObj = open(fileName, "r") 
-        nums = fileObj.read().splitlines() 
-        fileObj.close()
-        return nums
-
-
 if __name__ == "__main__":
-    data = pd.read_csv("~/python_challenges/numbers.csv")
-    test = (1,2,3,4,5,6,7,8,9,1,1,1,2,3,1)
-    result =  sonar_sweep(test)
+    data = pd.read_csv("numbers.csv",sep=',',header=None)
+    result =  sonar_sweep(data.values[0])
     print(result)
