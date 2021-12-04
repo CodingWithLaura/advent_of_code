@@ -16,12 +16,22 @@ for line in f.readlines():
     for i in range(len(fields)):
         my_nums.append(int(fields[i]))
 f.close()
-print(my_nums)
 
-#akku = 0
-#current_number = 0
-#for i in range (len(first_board[0])):
-#   if(first_board[i] == bingo_nums[i]):
-#       akku += 1
-#       current_number = bingo_nums[i]
-       
+print(first_board)
+print(my_nums[0])
+matrix_list = []
+for iy, ix in np.ndindex(first_board.shape):
+    matrix_list.append(first_board[iy, ix])
+
+print(matrix_list[0])
+
+#for i in my_nums:
+ #   for y in matrix_list:
+  #      if(my_nums[i] == matrix_list[y]):
+   #         print("yes")
+
+for i in my_nums:
+    if(matrix_list[i] == my_nums[0]):
+        print("yes")
+    else:
+        print("no")
