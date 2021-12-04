@@ -8,14 +8,20 @@ second_board = np.loadtxt('example_boards.txt', dtype=int, skiprows=5, max_rows=
 
 third_board = np.loadtxt('example_boards.txt', dtype=int, skiprows=11, max_rows=5)
 
-f = open("example_input.txt", "r")
-lines = f.readlines()
-bingo_nums = []
+#read numbers from textfile as ints and append to list
+my_nums = []
+f = open('example_input.txt', 'r')
+for line in f.readlines():
+    fields = line.split(',')
+    for i in range(len(fields)):
+        my_nums.append(int(fields[i]))
+f.close()
+print(my_nums)
 
-for x in lines:
-    bingo_nums.append(x.rstrip("\n").split(","))
-print(bingo_nums)
-
-
-for i in range (len(first_board[0])):
-   print(first_board[i])
+#akku = 0
+#current_number = 0
+#for i in range (len(first_board[0])):
+#   if(first_board[i] == bingo_nums[i]):
+#       akku += 1
+#       current_number = bingo_nums[i]
+       
