@@ -65,6 +65,14 @@ def read_boards_from_file(myfile):
         readed_boards +=1
     return boards
 
+def not_in_list(number, boards):
+    akkufalse = True
+    for board in boards:
+        if(board == number):
+            akkufalse = False
+            break
+    return akkufalse    
+
 boards = read_boards_from_file("real_boards.txt")
 
 #boards.append(first_board)
@@ -82,6 +90,7 @@ f.close()
 
 print(my_nums)
 
+winnerboards_marked = np.zeros((1,len(boards)))
 boards_marked = []
 for board in boards:
     boards_marked.append(np.zeros((5, 5)))
@@ -89,6 +98,9 @@ for board in boards:
 punkte_list = []
 
 winnerboard = []
+winner_account = 0
+last_winner = 0
+last_winner_punkte = 0
 for number in my_nums:
     winner_number = 0
     boardnumber = 0
@@ -101,12 +113,16 @@ for number in my_nums:
         if(value > 0):
             punkte = number * value
             winner_number = number
-            winnerboard.append(boardnumber)
             punkte_list.append(punkte)
-    if(len(winnerboard)>0):
-        break;
+            if (not_in_list( boardnumber,winnerboard)):
+              last_winner = boardnumber
+              last_winner_punkte = punkte
+            winnerboard.append(boardnumber)  
+            winnerboards_marked[0][boardnumber-1] = 1
+            winner_account += 1
 
+print("last_winner: {}, last_winner_punkte: {}\n".format(last_winner,last_winner_punkte))
 x = 0
-for winner in winnerboard:
-    print("the winner is:{} winnernumber:{} points are: {} \n".format(winnerboard[x],winner_number,punkte_list[x]))
-    x += 1
+#for winner in winnerboard:
+#    print("the winner is:{} winnernumber:{} points are: {} \n".format(winnerboard[x],winner_number,punkte_list[x]))
+#    x += 1
