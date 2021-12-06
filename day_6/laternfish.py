@@ -7,4 +7,13 @@ for line in f.readlines():
         laternfish.append(int(fields[i]))
 
 print(laternfish)
-print(len(laternfish))
+
+for fish in range (len(laternfish)):
+    print(laternfish[fish])
+    if(laternfish[fish] == 0):
+        laternfish[fish] = 6
+    if(laternfish[fish] == 6):
+        laternfish.append(8)
+    else: laternfish[fish] -= 1
+
+print(laternfish)
