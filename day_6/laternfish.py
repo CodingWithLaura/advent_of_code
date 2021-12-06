@@ -8,12 +8,13 @@ for line in f.readlines():
 
 print(laternfish)
 
-for fish in range (len(laternfish)):
-    print(laternfish[fish])
-    if(laternfish[fish] == 0):
-        laternfish[fish] = 6
-    if(laternfish[fish] == 6):
-        laternfish.append(8)
-    else: laternfish[fish] -= 1
+for i in range (0, 18):
+    for x in range (len(laternfish)):
+        if(laternfish[x] == 0):
+            laternfish[x] = 6
+            laternfish.insert(laternfish[x], 8)
+        else:
+            laternfish[x] -= 1
+    print(laternfish)
 
-print(laternfish)
+print(len(laternfish))
