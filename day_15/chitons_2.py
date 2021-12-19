@@ -33,6 +33,7 @@ def find_path(graph_dict, start, end):
     visited_nodes = set()
     node = start
     not_abbruch = True
+    marker = 0
     while(not_abbruch):
         cost = costs_dict[node][0] 
         neighbor_werte = graph_dict[node]
@@ -47,7 +48,10 @@ def find_path(graph_dict, start, end):
         visited_nodes.add(node)
         node = next_minimal_node(costs_dict, visited_nodes)
         if(node == (-1,-1)):
-            not_abbruch = False 
+            not_abbruch = False
+        marker +=1
+        if(marker %1000) == 0:
+            print(marker)
     return [ costs_dict[end][1]], costs_dict[end][0],costs_dict
 
 data = []
@@ -57,14 +61,33 @@ lines = f.readlines()
 for x in lines:
     data.append(list(map(int,x.rstrip("\n"))))
 
+#data -> data_advanced
+size_x = len(data[0]) #3
+size_y = len(data)    #3
+
+advance_scale = 5
+data_advanced = [[0]*size_x*advance_scale for i in range(size_y*advance_scale)]
+
+offset_y = -1
+for y_index in range(advance_scale*size_y):
+    offset_x = -1
+    if(y_index % size_y) == 0:
+        offset_y +=1
+    for x_index in range(advance_scale*size_x):
+        if(x_index % size_x) == 0:
+            offset_x +=1
+        wert_raw = data[y_index % size_y][x_index % size_x] + offset_y + offset_x    
+        data_advanced[y_index][x_index] = ((wert_raw-1)%9)+1
+
 my_dict = dict()
 
-for y_index in range(len(data)):
-    for x_index in range(len(data[y_index])-1):
+# data-matrix zu graph (dictionary)
+for y_index in range(len(data_advanced)):
+    for x_index in range(len(data_advanced[y_index])-1):
         node1 = (x_index, y_index)
         node2 = (x_index+1, y_index)
-        wert_r_l = data[y_index][x_index+1]
-        wert_l_r = data[y_index][x_index]
+        wert_r_l = data_advanced[y_index][x_index+1]
+        wert_l_r = data_advanced[y_index][x_index]
         # my_dict[node1] = {node2:wert}
         if node1 in my_dict:
             edge_n1_n2 = my_dict[node1]
@@ -83,12 +106,12 @@ for y_index in range(len(data)):
             edge_n2_n1[node1] = wert_l_r
             my_dict[node2] = edge_n2_n1
 
-for x_index in range(len(data[0])):
-    for y_index in range(len(data)-1):
+for x_index in range(len(data_advanced[0])):
+    for y_index in range(len(data_advanced)-1):
         node1 = (x_index, y_index)
         node2 = (x_index, y_index+1)
-        wert_o_u = data[y_index+1][x_index]
-        wert_u_o = data[y_index][x_index]
+        wert_o_u = data_advanced[y_index+1][x_index]
+        wert_u_o = data_advanced[y_index][x_index]
         
         # my_dict[node1] = {node2:wert}
         if node1 in my_dict:
@@ -110,7 +133,7 @@ for x_index in range(len(data[0])):
 
 path_list = []
 start = (0,0)
-end = (len(data[0])-1,len(data)-1 )
+end = (len(data_advanced[0])-1,len(data_advanced)-1 )
 path_list, risk, c_d = find_path(my_dict, start, end)
 print(path_list)
 print(risk)
@@ -125,7 +148,7 @@ for item in reverse_path:
     x = item[0]
     y = item[1]
     node = (x,y)
-    value = data[y][x]
+    value = data_advanced[y][x]
     if(x ==0 and y == 0):
         summe += 0
     else:    
