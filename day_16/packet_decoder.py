@@ -1,26 +1,63 @@
-def  cut_sub_packets(packets_string, maximum):
+def get_length_of_packet(packets_string, maximum):
+    type_id = packets_string[3:6]
+    length = 0
+    if(type_id =='100'):   
+        index = 6                       #<-- literal
+        not_end = True
+        while(not_end):
+            is_end_null = packets_string[index]
+            if(is_end_null == '0'):
+                length = index + 5
+                not_end = False
+            else:
+                index += 5
+            if(index > maximum) and (maximum != -1): #nur Kontrolle
+                length = 0
+                not_end = False
+    else:
+        switch = packets_string[6]
+        if(switch == '0'):  #length #pol
+            length = int(packets_string[7:22],2) + 7 + 15
+        else: #number  #pon
+            number = int(packets_string[7:18],2)
+            length = 18
+            while(number>0):
+                if(length + 7 > maximum) and (maximum != -1):
+                    print("failure packet too short")
+                    break
+                actual_sub_packet_length = get_length_of_packet(packets_string[length:],-1)
+                length += actual_sub_packet_length
+                number -= 1   
+    return length
+
+def cut_sub_packets(packets_string, maximum, number = -1):
     packets = []
-    not_end = True
     start_index = 0
-    index = 6
-    print(packets_string)
-    while(not_end):
-        is_end_null = packets_string[index]
-        if(is_end_null == '0'):
-            packet = packets_string[start_index:(index+4)]
-            print(packet)
-            packets.append(packet)
-            start_index = index + 5
-            index = start_index + 6
-        else:
-            index += 5
-        print(start_index)    
-        print(index)    
-        if(index >= maximum):
-            not_end = False
+    length = 0
+    actual_maximum = maximum
+    not_end = True
+    packet_count = 0
+    while(not_end):  #packet für packet 
+        length = get_length_of_packet(packets_string[start_index:], actual_maximum)
+        packet = packets_string[start_index:(start_index+length)]
+        packets.append(packet)
+        packet_count += 1
+
+        #swicth POL oder PON
+        if(number == -1): #POL
+            if(start_index+length > maximum-6):
+                not_end = False
+            else: #noch nicht am Ende
+                start_index += length
+                if(maximum != -1):
+                    actual_maximum -= length
+        else: #PON
+            if(packet_count == number):
+                break
+            else:
+                start_index += length
     return packets        
-# v              
-# 111 100 1 0001 1 1101 0 1001 # 110 100 ..
+
 class Packet:
     summe = 0
     def __init__(self, version, type_id, payload):
@@ -41,8 +78,7 @@ class Literal_packet(Packet):
     def set_sub_packets(sub_packet_list):
         return False
 
-
-class Operator_packet_length_subs(Packet):
+class Operator_packet_length_subs(Packet):  # <- schöni weil wir genau wissen wie groß paket mit seinen subpaketen ist
     def __init__(self,version, type_id, payload, sub_packet_list = []):
         super().__init__(version, type_id, payload) 
         self.sub_packet_list = sub_packet_list
@@ -52,16 +88,20 @@ class Operator_packet_length_subs(Packet):
         for packet in packets:
              self.sub_packet_list.append(packet_factory(packet))  
         print("Operator_packet_length_subs")
-    def set_sub_packets(sub_packet_list):
+    def set_sub_packets(self, sub_packet_list):
         return True
     
-class Operator_packet_number_subs(Packet):
+class Operator_packet_number_subs(Packet):   #<- unschöni, weil wir dynamisch durch das paket und seine subpakete durchhampeln müssen
     def __init__(self, version, type_id, payload, sub_packet_list = [] ):
         super().__init__(version, type_id, payload)
         self.sub_packet_list = sub_packet_list
         self.amount = int(payload[1:12],2)
+        sub_packets_payload = payload[12:]
+        packets = cut_sub_packets(sub_packets_payload, -1, self.amount)
+        for packet in packets:
+             self.sub_packet_list.append(packet_factory(packet))
         print("Operator_packet_number_subs")
-    def set_sub_packets(sub_packet_list):
+    def set_sub_packets(self, sub_packet_list):
         return True    
 
 def packet_factory(bin_list):
@@ -95,11 +135,22 @@ example1 = "D2FE28"
 example1_bin = 110100101111111000101000
 
 example2 = '38006F45291200'
-
+example2_bin = '0011100000000000011011 1101000101001010010001001000000000'
+                                               # 00101001000100100
 example3 = 'EE00D40C823060'
+example3_bin = '11101110000000001101010000001100100000100011000001100000'
 
+example4 = '8A004A801A8002F478'
+
+example5 = '620080001611562C8802118E34'
+example5_bin ='011 000 1 00000000010#000 000 0 000000000010110#000 100 0 1010#101 100 0 1011# 001 000 1 00000000010#000 100 0 1100#011 100 0 1101#00'
 easy_example = '1a'
-bin_list = hex_to_bin(example2)
+
+example6 ='C0015000016115A2E0802F182340'
+
+example7 = 'A0016C880162017C3686B18A3D4780'
+
+bin_list = hex_to_bin(example7)
 print(bin_list)
 my_packet = packet_factory(bin_list)
 my_packet.print_summe()
